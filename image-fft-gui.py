@@ -10,6 +10,12 @@ class ImageProcessingApp:
         self.root = root
         self.root.title("FourierVision")
         
+        # 画像ファイルを選択する
+        file_path_in = filedialog.askopenfilename(filetypes=[("Image files", "*.jpg;*.png;*.bmp")])
+        if file_path_in:
+            self.image = Image.open(file_path_in)
+            #self.display_image(self.image)
+        
         # メインフレーム
         main_frame = ttk.Frame(root)
         main_frame.pack(expand=True, fill=tk.BOTH, padx=10, pady=10)
@@ -123,7 +129,7 @@ class ImageProcessingApp:
         self.binary_img_pil = None  # フーリエ変換画像を格納する変数を追加
         
         # 画像の読み込みと初期表示
-        self.image = Image.open("img_origin.jpg")
+        #self.image = Image.open("img_origin.jpg")
         self.display_image(self.image, self.original_image_label)
         self.display_image(self.image, self.fft_image_label)
         self.display_image(self.image, self.ifft_image_label)
