@@ -106,18 +106,21 @@ class ImageProcessingApp:
         self.tab_control.add(self.fft_tab, text="フーリエ変換")
         self.fft_image_label = ttk.Label(self.fft_tab)
         self.fft_image_label.pack(expand=True, fill=tk.BOTH)
+        self.fft_img_pil = None  # フーリエ変換画像を格納する変数を追加
         
         # 逆フーリエ変換タブ
         self.ifft_tab = ttk.Frame(self.tab_control)
         self.tab_control.add(self.ifft_tab, text="逆フーリエ変換")
         self.ifft_image_label = ttk.Label(self.ifft_tab)
         self.ifft_image_label.pack(expand=True, fill=tk.BOTH)
+        self.ifft_img_pil = None  # フーリエ変換画像を格納する変数を追加
         
         # 二値化タブ
         self.binary_tab = ttk.Frame(self.tab_control)
         self.tab_control.add(self.binary_tab, text="二値化")
         self.binary_image_label = ttk.Label(self.binary_tab)
         self.binary_image_label.pack(expand=True, fill=tk.BOTH)
+        self.binary_img_pil = None  # フーリエ変換画像を格納する変数を追加
         
         # 画像の読み込みと初期表示
         self.image = Image.open("img_origin.jpg")
@@ -169,15 +172,20 @@ class ImageProcessingApp:
         binary_img = np.where(ifft_img < threshold, 0, 255).astype(np.uint8)
         
         # 画像をPIL形式に戻す
-        fft_img_pil = Image.fromarray(np.abs(fft_img_filtered))
-        ifft_img_pil = Image.fromarray(ifft_img)
-        binary_img_pil = Image.fromarray(binary_img)
+        self.fft_img_pil = Image.fromarray(np.abs(fft_img_filtered).astype(np.uint8))
+        self.ifft_img_pil = Image.fromarray(ifft_img.astype(np.uint8))
+        self.binary_img_pil = Image.fromarray(binary_img.astype(np.uint8))
         
         # 画像を表示
         self.display_image(self.image, self.original_image_label)
-        self.display_image(fft_img_pil, self.fft_image_label)
-        self.display_image(ifft_img_pil, self.ifft_image_label)
-        self.display_image(binary_img_pil, self.binary_image_label)
+        self.display_image(self.fft_img_pil, self.fft_image_label)
+        self.display_image(self.ifft_img_pil, self.ifft_image_label)
+        self.display_image(self.binary_img_pil, self.binary_image_label)
+        
+        # 画像をインスタンス変数に格納
+        #self.fft_image = fft_img_pil
+        #self.ifft_image = ifft_img_pil
+        #self.binary_image = binary_img_pil
         
     def display_image(self, image, label):
         # 画像をリサイズしてLabelに表示
@@ -191,21 +199,22 @@ class ImageProcessingApp:
         file_path = filedialog.asksaveasfilename(defaultextension=".jpg", filetypes=[("JPEG files", "*.jpg"), ("All files", "*.*")])
         if file_path:
             # 選択されたタブに応じて画像を取得
-            if self.tab_control.index("current") == 0:
-                image_label = self.original_image_label
-            elif self.tab_control.index("current") == 1:
-                image_label = self.fft_image_label
-            elif self.tab_control.index("current") == 2:
-                image_label = self.ifft_image_label
-            elif self.tab_control.index("current") == 3:
-                image_label = self.binary_image_label
+            current_tab_index = self.tab_control.index("current")
+            if current_tab_index == 1:
+                image_pil = self.fft_img_pil
+            elif current_tab_index == 2:
+                image_pil = self.ifft_img_pil
+            elif current_tab_index == 3:
+                image_pil = self.binary_img_pil
             else:
-                image_label = None
-        
-            if image_label:
+                image_pil = None
+            
+            if image_pil:
                 # 画像を取得して保存
-                image = image_label.winfo_children()[0].image
-                image_data = image._PhotoImage__photo.zoom(1).subsample(1).write(file_path)
+                #print(image_label.winfo_children())
+                image_pil.save(file_path)
+                #image_data = image_label.winfo_children()[0].cget("image")
+                #image_data.write(file_path)
                 print(f"画像を {file_path} に保存しました。")
             else:
                 print("保存する画像がありません。")
